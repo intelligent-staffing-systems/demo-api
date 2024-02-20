@@ -1,0 +1,12 @@
+# Environment variables
+.env
+
+# Python cache files
+**/__pycache__/
+*.pyc
+
+# Distribution artifacts
+dist/
+
+# Version-specific Python version file
+.python-version
