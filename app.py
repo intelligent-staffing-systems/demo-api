@@ -3,6 +3,10 @@ import requests
 
 app = Flask(__name__)
 
+@app.route('/test')
+def test():
+    return 'Flask is running!'
+
 @app.route('/initiate_call', methods=['POST'])
 def initiate_call():
     # Extract data from incoming request
