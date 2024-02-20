@@ -13,6 +13,8 @@ numpy = "^1.26.2"
 pre-commit = "^3.6.0"
 dash-core-components = "^2.0.0"
 dash-html-components = "^2.0.0"
+requests = "^2.31.0"
+flask = "^3.0.2"
 
 [tool.poetry.group.test]
 optional = true
