@@ -1,20 +1,18 @@
 #!/bin/bash
 
-# Replace these variables with actual values
-PROMPT_ID=1
-PHONE="3854509574"  # Example phone number, replace with a real number for actual testing
-NAME="John Doe"
+PROMPT_ID=64808
+PHONE="3854509574"
+NAME="Lucas"
 
-# Ensure the AIR_API_KEY environment variable is set before running this script
 if [ -z "$AIR_API_KEY" ]; then
   echo "Error: AIR_API_KEY is not set."
   exit 1
 fi
 
-# The URL of your Flask application's initiate_call endpoint
-URL="http://localhost:8050/initiate_call"
+# The URL of Flask application's initiate_call endpoint
+# URL="http://localhost:8050/initiate_call"
+URL="https://api.air.ai/v1/calls"
 
-# Make the POST request
 curl --request POST \
   --url $URL \
   --header "Accept: application/json" \
@@ -26,6 +24,4 @@ curl --request POST \
     \"name\": \"$NAME\",
     \"metadata\": {}
   }"
-
-
 
