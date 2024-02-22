@@ -1,16 +1,35 @@
-### Current dev workflow
+# ISS setter for licensed agents
+This app is designed to facilitate setting appointments
+
+
+# Secrets
+## bashrc values for local development
+.env file uses local variable
+```
+AIR_API_KEY=$AIR_API_KEY
+```
+Make sure developers have the needed value in the ~/.bashrc.  
+Both poetry (local development) and docker (local docker development) utilize the .env
+
+## Production Secrets
+Then, in production, secrets are handled via SSM parameter store
+And are made available to the EKS pods upon deployment (I believe, still in process)
+
+
+# Development
+## Current dev workflow ends up being
+```
+poetry run python app.py
+```
+Then, running in the standalone Gunicorn app:
 ```
 docker compose -f ci/docker-compose-dev.yml down && \
-docker compose -f ci/docker-compose-dev.yml up
+docker compose -f ci/docker-compose-dev.yml up --build
 ```
 
-right now both dev and production use:
-```
-docker compose -f ci/docker-compose.yml build
-docker compose -f ci/docker-compose.yml up
-```
+Then, on push, the pipeline with automatically test this image and push to ECR; from that point the rest handled by CI/CD.
 
-and the installation script for docker is:
+### Install Docker with Buildx
 ```
 sudo -v
 sudo apt-get -y install ca-certificates curl gnupg
@@ -26,41 +45,8 @@ docker --version
 docker run hello-world
 ```
 
-## Setting up the DEV environment
-okay, so for development I'm just going to have a .env file with:
-```
-AIR_API_KEY=$AIR_API_KEY
-```
-And I'll make sure my developers have the needed value in the ~/.bashrc.  That should work for the poetry run command, right?
 
-Then, for the docker setup, docker-compose, as you suggested, is sufficient, by adding something like:
-```
-services:
-  your_service:
-    environment:
-      AIR_API_KEY: ${AIR_API_KEY}
-```
-Which will use the ~/.bashrc value.
-
-
-
-
-
-
-
-
-
-
-
-
-
-# linear-graph-project
-making a y=mx+b software for a life insurance company presentation
-
-### Prerequisites:
-- Ubuntu 22.04 or similar Linux distribution
-
-## Getting Started with the Project
+## Starting Development
 This comprehensive guide provides a smooth and clear path for setting up the development environment with Pyenv and Poetry, ensuring developers have all the tools they need to get started.
 
 This guide assumes [Pyenv](https://github.com/pyenv/pyenv) is installed on your system.  If you don't, as of 12-27-2023 on Ubuntu 22.04 the commands are:
@@ -80,29 +66,23 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 ```
 This is useful for automatically using the local environment when you `cd` into the repo's directory, as seen below.
-
-## Setting Up the Development Environment
+Pyenv allows you to easily switch between multiple versions of Python, and Poetry is a tool for dependency management and packaging in Python.
+So it should end up being pyenv -> pip install poetry -> poetry install and run
 
 Run `pre-commit install` to install pre-commit into your git hooks. pre-commit will now run on every commit. Every time you clone a project using pre-commit running pre-commit install should always be the first thing you do.  Linting is also done via actions each time you remote commit.
-
 Occassionally run `pre-commit autoupdate` to get the latest repos for plugins, afterwhich you again run `pre-commit install`.
-
-Pyenv allows you to easily switch between multiple versions of Python, and Poetry is a tool for dependency management and packaging in Python.
-
-me: so it should end up being pyenv -> pip install poetry -> poetry install and run
 
 ### pyenv commands
 ```
 pyenv install 3.12.1
-pyenv virtualenv 3.12.1 linear-pyenv
-pyenv local linear-pyenv
+pyenv virtualenv 3.12.1 iss-setter
+pyenv local iss-setter
 ```
 
 This project includes a `.python-version` file, which Pyenv uses to automatically activate the correct environment when you enter the project directory:
-with a simple cd into this directory you should now be in the `linear-pyenv` environment.
+with a simple cd into this directory you should now be in the `iss-setter` environment.
 
 ### Step 3: Install and Set Up Poetry
-
 Poetry is a tool for dependency management and packaging in Python. It allows you to declare the libraries your project depends on and it will manage (install/update) them for you.
 
 ### Step 3: Install and Set Up Poetry and dependencies
