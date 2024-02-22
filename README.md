@@ -45,11 +45,8 @@ docker --version
 docker run hello-world
 ```
 
-
-## Starting Development
-This comprehensive guide provides a smooth and clear path for setting up the development environment with Pyenv and Poetry, ensuring developers have all the tools they need to get started.
-
-This guide assumes [Pyenv](https://github.com/pyenv/pyenv) is installed on your system.  If you don't, as of 12-27-2023 on Ubuntu 22.04 the commands are:
+### Install pyenv and poetry
+[Pyenv](https://github.com/pyenv/pyenv) is installed, as of 12-27-2023 on Ubuntu 22.04, with the commands:
 ```bash
 #install pyenv
 curl https://pyenv.run | bash
@@ -68,9 +65,6 @@ eval "$(pyenv virtualenv-init -)"
 This is useful for automatically using the local environment when you `cd` into the repo's directory, as seen below.
 Pyenv allows you to easily switch between multiple versions of Python, and Poetry is a tool for dependency management and packaging in Python.
 So it should end up being pyenv -> pip install poetry -> poetry install and run
-
-Run `pre-commit install` to install pre-commit into your git hooks. pre-commit will now run on every commit. Every time you clone a project using pre-commit running pre-commit install should always be the first thing you do.  Linting is also done via actions each time you remote commit.
-Occassionally run `pre-commit autoupdate` to get the latest repos for plugins, afterwhich you again run `pre-commit install`.
 
 ### pyenv commands
 ```
@@ -100,15 +94,19 @@ Poetry is a tool for dependency management and packaging in Python. It allows yo
    poetry install
 ```
 
-### Step 5: Running the Application
+### pre-commit hooks
+Run `pre-commit install` to install pre-commit into your git hooks. pre-commit will now run on every commit. Every time you clone a project using pre-commit running pre-commit install should always be the first thing you do.  Linting is also done via actions each time you remote commit.
+Occassionally run `pre-commit autoupdate` to get the latest repos for plugins, afterwhich you again run `pre-commit install`.
 
-To run the Dash application within the Poetry-managed environment, you can use the `poetry run` command. This ensures you're using the correct versions of Python and all dependencies.
+
+### Running the Application
+
+Run locally within the Poetry-managed environment -- this ensures you're using the correct versions of Python and all dependencies.
 
 ```bash
 poetry run python app.py
 ```
 
-This command should be used each time you want to run your application, ensuring that the correct virtual environment is always utilized.
 
 ### Adding and Managing Dependencies
 
