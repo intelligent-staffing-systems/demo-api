@@ -1,11 +1,16 @@
 version: "3.8"
 services:
   lgp-app:
+    env_file:
+      - path: ../.env
+    environment:
+      - AIR_API_KEY:${AIR_API_KEY}
     build:
       context: ..
       dockerfile: ci/Dockerfile
-    container_name: lgp-app
+    container_name: iss-setter
     volumes:
-      - .:/linear-graph-project
+      - .:/iss-setter
     ports:
       - "8050:8050"  # Adjust if your app uses a different port
+

@@ -26,6 +26,30 @@ docker --version
 docker run hello-world
 ```
 
+## Setting up the DEV environment
+okay, so for development I'm just going to have a .env file with:
+```
+AIR_API_KEY=$AIR_API_KEY
+```
+And I'll make sure my developers have the needed value in the ~/.bashrc.  That should work for the poetry run command, right?
+
+Then, for the docker setup, docker-compose, as you suggested, is sufficient, by adding something like:
+```
+services:
+  your_service:
+    environment:
+      AIR_API_KEY: ${AIR_API_KEY}
+```
+Which will use the ~/.bashrc value.
+
+
+
+
+
+
+
+
+
 
 
 

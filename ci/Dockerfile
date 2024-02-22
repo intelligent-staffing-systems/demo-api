@@ -72,6 +72,7 @@ COPY --from=builder /app /app
 
 # Set the path to the virtual environment's site-packages in the distroless image
 ENV PYTHONPATH=/app/.venv/lib/python3.11/site-packages
+ENV AIR_API_KEY=""
 
 # Set the working directory in the distroless image
 WORKDIR /app
