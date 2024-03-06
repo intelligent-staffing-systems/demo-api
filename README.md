@@ -1,19 +1,5 @@
-# ISS setter for licensed agents
-This app is designed to facilitate setting appointments
-
-
-# Secrets
-## bashrc values for local development
-.env file uses local variable
-```
-AIR_API_KEY=$AIR_API_KEY
-```
-Make sure developers have the needed value in the ~/.bashrc.  
-Both poetry (local development) and docker (local docker development) utilize the .env
-
-## Production Secrets
-Then, in production, secrets are handled via SSM parameter store
-And are made available to the EKS pods upon deployment (I believe, still in process)
+# Demo api for VA Notify POCs
+Pipeline stuff
 
 
 # Development
