@@ -55,8 +55,8 @@ So it should end up being pyenv -> pip install poetry -> poetry install and run
 ### pyenv commands
 ```
 pyenv install 3.12.1
-pyenv virtualenv 3.12.1 iss-setter
-pyenv local iss-setter
+pyenv virtualenv 3.12.1 api-demo
+pyenv local api-demo
 ```
 
 This project includes a `.python-version` file, which Pyenv uses to automatically activate the correct environment when you enter the project directory:
