@@ -20,10 +20,10 @@ jobs:
         id: set-hash
         run: echo "commit-hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Create local testing branch
+      - name: Create QA testing branch
         id: create_branch
         run: |
-          TEMP_BRANCH="local-testing-${{ steps.set-hash.outputs.commit-hash }}"
+          TEMP_BRANCH="QA-testing-${{ steps.set-hash.outputs.commit-hash }}"
           echo "branch=$TEMP_BRANCH" >> $GITHUB_OUTPUT
           git checkout -b $TEMP_BRANCH
 
@@ -55,7 +55,7 @@ jobs:
     needs: deploy-to-performance
     runs-on: ubuntu-latest
     environment: 
-      name: perf
+      name: perf-post-test
     steps:
       - name: Pause for manual approval
         run: echo "Deployment paused for manual approval in the 'perf' environment."
