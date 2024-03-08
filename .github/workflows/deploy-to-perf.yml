@@ -1,15 +1,68 @@
-name: Deployment to Perf
+name: Deployment to Performance Environment
 
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_branch: ${{ steps.create_branch.outputs.branch }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create deployment branch
+        id: create_branch
+        run: |
+          BRANCH_NAME="deploy-$(date +%Y-%m-%d-%H-%M-%S)"
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+          echo "::set-output name=branch::$BRANCH_NAME"
+
+  wait-for-approval:
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: perf
+    steps:
+      - name: Pause for manual approval
+        run: echo "Deployment paused for manual approval in the 'perf' environment."
+
   deploy:
-    uses: ./.github/workflows/deployment-demo.yml
-    with:
-      environment: perf
-      ref: "master"
-    secrets: inherit
+    needs: wait-for-approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployment branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.prepare-deployment.outputs.deploy_branch }}
+
+      - name: Deploy to Performance
+        id: deploy
+        run: echo "Deploying to performance environment..."
+        # Your deployment script/command here
+
+  merge-or-cleanup:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'approve' }}
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v2
+        with:
+          ref: release
+
+      - name: Merge deployment branch into release
+        run: |
+          git merge --no-ff ${{ needs.prepare-deployment.outputs.deploy_branch }} -m "Merging tested code from ${{ needs.prepare-deployment.outputs.deploy_branch }}"
+          git push origin release
+        if: ${{ github.event.inputs.action == 'approve' }}
+
+      - name: Delete deployment branch
+        run: |
+          git push origin --delete ${{ needs.prepare-deployment.outputs.deploy_branch }}
+        if: ${{ github.event.inputs.action == 'reject' }}
 
