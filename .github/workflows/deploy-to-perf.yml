@@ -67,11 +67,11 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      # - name: Checkout release branch
-        # uses: actions/checkout@v2
-        # with:
+      - name: Checkout release branch
+        uses: actions/checkout@v2
+        with:
           # ref: release
-          # fetch-depth: 0 # Fetch all history for all branches and tags
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       # - name: Fetch the temporary branch
         # run: git fetch origin ${{ needs.prepare-deployment.outputs.deploy_branch }}:${{ needs.prepare-deployment.outputs.deploy_branch }}
