@@ -79,6 +79,9 @@ jobs:
       - name: Merge temporary branch to release
         run: |
           git status
+          gith checkout release
+          git status
+          git diff
           # git merge --no-ff ${{ needs.prepare-deployment.outputs.deploy_branch }}
           # git push origin release
 
