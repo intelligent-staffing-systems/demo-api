@@ -73,6 +73,7 @@ jobs:
 
       - name: Merge to release branch
         run: |
+          git checkout release
           git merge ${{ needs.prepare-deployment.outputs.deploy_branch }}
           git push origin release
 
