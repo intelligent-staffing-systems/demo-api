@@ -60,21 +60,21 @@ jobs:
       - name: Pause for manual approval
         run: echo "Deployment paused for manual approval in the 'perf' environment."
 
-  # merge-and-cleanup:
-    # if: ${{ github.event.review.state == 'approved' }}
-    # needs: wait-for-approval-post-QA-testing
-    # runs-on: ubuntu-latest
-    # steps:
-      # # - name: Checkout release branch
-        # # uses: actions/checkout@v2
-        # # with:
-          # # ref: release
+  merge-and-cleanup:
+    needs: wait-for-approval-post-testing
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v2
+        with:
+          ref: release
 
-      # - name: Merge to release branch
-        # run: |
-          # git checkout release
-          # git merge ${{ needs.prepare-deployment.outputs.deploy_branch }}
-          # git push origin release
+      - name: Merge to release branch
+        run: |
+          git merge ${{ needs.prepare-deployment.outputs.deploy_branch }}
+          git push origin release
 
     # - name: Merge changes into release
       # run: |
