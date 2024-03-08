@@ -63,20 +63,30 @@ jobs:
       - name: Wait for manual approval
         run: echo "Waiting for QA to approve or reject the deployment."
 
-  merge-and-cleanup:
-    needs: manual-approval
-    if: ${{ github.event.review.state == 'approved' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository and merge into release
-        uses: actions/checkout@v2
-        with:
-          ref: release
-        run: |
-          git merge ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }} --no-ff -m "Merging approved changes into release"
-          git push origin release
+merge-and-cleanup:
+  needs: trigger-deployment
+  if: ${{ github.event.review.state == 'approved' }} # This condition should be adjusted based on actual event handling for approval
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout release branch
+      uses: actions/checkout@v2
+      with:
+        ref: release
 
-      - name: Cleanup after merge
-        run: |
-          git push origin --delete ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }}
+    - name: Merge changes into release
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git merge ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }} --no-ff -m "Merging approved changes into release"
+        git push origin release
+
+    - name: Cleanup temporary branch
+      uses: actions/github-script@v5
+      with:
+        script: |
+          github.git.deleteRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: 'heads/${{ needs.trigger-deployment.outputs.TEMP_BRANCH }}'
+          })
 
