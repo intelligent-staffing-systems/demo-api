@@ -18,18 +18,19 @@ jobs:
         id: set-hash
         run: echo "commit-hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Use commit hash
-        run: |
-          echo "The commit hash is ${{ steps.set-hash.outputs.commit-hash }}"
-
-
       - name: Create local testing branch
+        id: create_branch
         run: |
-          echo "TEMP_BRANCH=local-testing-${{ steps.set-hash.outputs.commit-hash }}" >> $GITHUB_ENV
+          TEMP_BRANCH="local-testing-${{ steps.set-hash.outputs.commit-hash }}"
+          echo "branch=$TEMP_BRANCH" >> $GITHUB_OUTPUT
+          git checkout -b $TEMP_BRANCH
 
-      - name: Echo TEMP_BRANCH
+      - name: Push the temporary branch to remote
         run: |
-          echo "The TEMP_BRANCH is $TEMP_BRANCH"
+          git push origin ${{ steps.create_branch.outputs.branch }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   wait-for-approval-to-deploy:
     needs: prepare-deployment
