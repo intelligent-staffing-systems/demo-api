@@ -71,12 +71,33 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: release
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
-      - name: Merge to release branch
+      - name: Fetch the temporary branch
+        run: git fetch origin ${{ needs.prepare-deployment.outputs.deploy_branch }}:${{ needs.prepare-deployment.outputs.deploy_branch }}
+
+      - name: Merge temporary branch to release
         run: |
-          git checkout release
-          git merge ${{ needs.prepare-deployment.outputs.deploy_branch }}
+          git merge --no-ff ${{ needs.prepare-deployment.outputs.deploy_branch }}
           git push origin release
+
+
+  # merge-and-cleanup:
+    # needs: wait-for-approval-post-testing
+    # permissions:
+      # contents: write
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Checkout release branch
+        # uses: actions/checkout@v2
+        # with:
+          # ref: release
+
+      # - name: Merge to release branch
+        # run: |
+          # git checkout release
+          # git merge ${{ needs.prepare-deployment.outputs.deploy_branch }}
+          # git push origin release
 
     # - name: Merge changes into release
       # run: |
