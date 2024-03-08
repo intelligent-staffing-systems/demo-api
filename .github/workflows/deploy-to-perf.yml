@@ -27,7 +27,7 @@ jobs:
 
       - name: Push the temporary branch to remote
         run: |
-          git push origin ${{ steps.create_branch.outputs.branch }}
+          git push -u origin ${{ steps.create_branch.outputs.branch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
