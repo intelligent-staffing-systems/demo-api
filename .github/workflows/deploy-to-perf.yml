@@ -6,87 +6,94 @@ on:
       - main
 
 jobs:
-  prepare-and-test:
+  prepare-deployment:
     runs-on: ubuntu-latest
+    outputs:
+      deploy_branch: ${{ steps.create_branch.outputs.branch }}
     outputs:
       commit-hash: ${{ steps.set-hash.outputs.commit-hash }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create local testing branch
-        run: |
-          echo "TEMP_BRANCH=local-testing-$(date +%Y-%m-%d-%H-%M-%S)" >> $GITHUB_ENV
-
-      - name: Run tests
-        run: echo "Run your tests here"
-        # Add steps to run your actual tests here
-
       - name: Set commit hash for deployment
         id: set-hash
         run: echo "commit-hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
-  wait-for-approval:
-    runs-on: ubuntu-latest
-    needs: prepare-and-test
-    environment:
-      name: perf
-      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    steps:
-      - name: Pause for manual approval
-        run: echo "Deployment paused for manual approval in the 'perf' environment."
-
-  trigger-deployment:
-    if: ${{ always() }}
-    needs: wait-for-approval
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: release
-
-      - name: Merge main into temporary branch for testing
+      - name: Use commit hash
         run: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
-          git checkout -b ${{ env.TEMP_BRANCH }}
-          git merge ${{ needs.prepare-and-test.outputs.commit-hash }} --no-ff -m "Merging main into temporary branch for performance testing"
-          git push origin ${{ env.TEMP_BRANCH }}
+          echo "The commit hash is ${{ steps.set-hash.outputs.commit-hash }}"
 
-  manual-approval:
-    if: ${{ always() }}
-    needs: trigger-deployment
-    environment:
-      name: perf
-    steps:
-      - name: Wait for manual approval
-        run: echo "Waiting for QA to approve or reject the deployment."
 
-merge-and-cleanup:
-  needs: trigger-deployment
-  if: ${{ github.event.review.state == 'approved' }} # This condition should be adjusted based on actual event handling for approval
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout release branch
-      uses: actions/checkout@v2
-      with:
-        ref: release
+      - name: Create local testing branch
+        run: |
+          echo "TEMP_BRANCH=local-testing-${{ steps.set-hash.outputs.commit-hash }}" >> $GITHUB_ENV
 
-    - name: Merge changes into release
-      run: |
-        git config user.name "github-actions"
-        git config user.email "github-actions@github.com"
-        git merge ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }} --no-ff -m "Merging approved changes into release"
-        git push origin release
+      - name: Echo TEMP_BRANCH
+        run: |
+          echo "The TEMP_BRANCH is $TEMP_BRANCH"
 
-    - name: Cleanup temporary branch
-      uses: actions/github-script@v5
-      with:
-        script: |
-          github.git.deleteRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: 'heads/${{ needs.trigger-deployment.outputs.TEMP_BRANCH }}'
-          })
+  # wait-for-approval:
+    # runs-on: ubuntu-latest
+    # needs: prepare-and-test
+    # environment:
+      # name: perf
+      # url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    # steps:
+      # - name: Pause for manual approval
+        # run: echo "Deployment paused for manual approval in the 'perf' environment."
+
+  # trigger-deployment:
+    # if: ${{ always() }}
+    # needs: wait-for-approval
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Checkout repository
+        # uses: actions/checkout@v2
+        # with:
+          # ref: release
+
+      # - name: Merge main into temporary branch for testing
+        # run: |
+          # git config --global user.email "you@example.com"
+          # git config --global user.name "Your Name"
+          # git checkout -b ${{ env.TEMP_BRANCH }}
+          # git merge ${{ needs.prepare-and-test.outputs.commit-hash }} --no-ff -m "Merging main into temporary branch for performance testing"
+          # git push origin ${{ env.TEMP_BRANCH }}
+
+  # manual-approval:
+    # if: ${{ always() }}
+    # needs: trigger-deployment
+    # environment:
+      # name: perf
+    # steps:
+      # - name: Wait for manual approval
+        # run: echo "Waiting for QA to approve or reject the deployment."
+
+# merge-and-cleanup:
+  # needs: trigger-deployment
+  # # if: ${{ github.event.review.state == 'approved' }} # This condition should be adjusted based on actual event handling for approval
+  # runs-on: ubuntu-latest
+  # steps:
+    # - name: Checkout release branch
+      # uses: actions/checkout@v2
+      # with:
+        # ref: release
+
+    # - name: Merge changes into release
+      # run: |
+        # git config user.name "github-actions"
+        # git config user.email "github-actions@github.com"
+        # git merge ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }} --no-ff -m "Merging approved changes into release"
+        # git push origin release
+
+    # - name: Cleanup temporary branch
+      # uses: actions/github-script@v5
+      # with:
+        # script: |
+          # github.git.deleteRef({
+            # owner: context.repo.owner,
+            # repo: context.repo.repo,
+            # ref: 'heads/${{ needs.trigger-deployment.outputs.TEMP_BRANCH }}'
+          # })
 
