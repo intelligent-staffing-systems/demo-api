@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       deploy_branch: ${{ steps.create_branch.outputs.branch }}
-    outputs:
-      commit-hash: ${{ steps.set-hash.outputs.commit-hash }}
+    # outputs:
+      # commit-hash: ${{ steps.set-hash.outputs.commit-hash }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
