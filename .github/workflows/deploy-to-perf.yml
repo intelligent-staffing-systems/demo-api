@@ -50,7 +50,7 @@ jobs:
           ref: ${{ needs.prepare-deployment.outputs.deploy_branch }}
 
   wait-for-approval-post-QA-testing:
-    needs: prepare-deployment
+    needs: deploy-to-performance
     runs-on: ubuntu-latest
     environment: 
       name: perf
