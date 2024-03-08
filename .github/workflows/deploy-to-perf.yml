@@ -37,8 +37,8 @@ jobs:
   wait-for-approval-to-deploy:
     needs: prepare-deployment
     runs-on: ubuntu-latest
-    environment: 
-      name: perf
+    # environment: 
+      # name: perf
     steps:
       - name: Pause for manual approval
         run: echo "Deployment paused for manual approval in the 'perf' environment."
@@ -55,8 +55,8 @@ jobs:
   wait-for-approval-post-testing:
     needs: deploy-to-performance
     runs-on: ubuntu-latest
-    environment: 
-      name: perf-post-test
+    # environment: 
+      # name: perf-post-test
     steps:
       - name: Pause for manual approval
         run: echo "Deployment paused for manual approval in the 'perf' environment."
@@ -74,6 +74,7 @@ jobs:
 
       - name: Merge to release branch
         run: |
+          git checkout release
           git merge ${{ needs.prepare-deployment.outputs.deploy_branch }}
           git push origin release
 
