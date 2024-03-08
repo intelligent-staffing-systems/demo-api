@@ -16,7 +16,7 @@ jobs:
 
       - name: Create local testing branch
         run: |
-          git checkout -b local-testing-$(date +%Y-%m-%d-%H-%M-%S)
+          echo "TEMP_BRANCH=local-testing-$(date +%Y-%m-%d-%H-%M-%S)" >> $GITHUB_ENV
 
       - name: Run tests
         run: echo "Run your tests here"
@@ -31,6 +31,7 @@ jobs:
     needs: prepare-and-test
     environment:
       name: perf
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Pause for manual approval
         run: echo "Deployment paused for manual approval in the 'perf' environment."
@@ -40,20 +41,42 @@ jobs:
     needs: wait-for-approval
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Deployment Workflow
-        uses: actions/github-script@v5
+      - name: Checkout repository
+        uses: actions/checkout@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'Deploy to Env - API.yml',
-              ref: 'main',
-              inputs: {
-                environment: 'perf',
-                ref: '${{ needs.prepare-and-test.outputs.commit-hash }}',
-                lambdaDeploy: 'false' # Set this based on your logic or pass it as an input
-              }
-            })
+          ref: release
+
+      - name: Merge main into temporary branch for testing
+        run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+          git checkout -b ${{ env.TEMP_BRANCH }}
+          git merge ${{ needs.prepare-and-test.outputs.commit-hash }} --no-ff -m "Merging main into temporary branch for performance testing"
+          git push origin ${{ env.TEMP_BRANCH }}
+
+  manual-approval:
+    if: ${{ always() }}
+    needs: trigger-deployment
+    environment:
+      name: perf
+    steps:
+      - name: Wait for manual approval
+        run: echo "Waiting for QA to approve or reject the deployment."
+
+  merge-and-cleanup:
+    needs: manual-approval
+    if: ${{ github.event.review.state == 'approved' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and merge into release
+        uses: actions/checkout@v2
+        with:
+          ref: release
+        run: |
+          git merge ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }} --no-ff -m "Merging approved changes into release"
+          git push origin release
+
+      - name: Cleanup after merge
+        run: |
+          git push origin --delete ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }}
 
