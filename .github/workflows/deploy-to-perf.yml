@@ -8,6 +8,8 @@ on:
 jobs:
   prepare-deployment:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       deploy_branch: ${{ steps.create_branch.outputs.branch }}
     steps:
