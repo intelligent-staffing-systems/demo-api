@@ -81,7 +81,7 @@ jobs:
           git status
           git checkout release
           git status
-          git diff
+          git diff main release
           # git merge --no-ff ${{ needs.prepare-deployment.outputs.deploy_branch }}
           # git push origin release
 
