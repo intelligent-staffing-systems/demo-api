@@ -33,7 +33,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
   wait-for-approval-to-deploy:
     needs: prepare-deployment
     runs-on: ubuntu-latest
