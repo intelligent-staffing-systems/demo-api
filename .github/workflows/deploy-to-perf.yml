@@ -40,6 +40,11 @@ jobs:
     environment: 
       name: perf
     steps:
+      - name: Checkout deployment branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.prepare-deployment.outputs.deploy_branch }}
+
       - name: Pause for manual approval
         run: echo "Deployment paused for manual approval in the 'perf' environment."
 
