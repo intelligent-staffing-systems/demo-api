@@ -41,7 +41,7 @@ jobs:
         run: echo "Deployment paused for manual approval in the 'perf' environment."
 
   deploy-to-performance:
-    needs: wait-for-approval
+    needs: wait-for-approval-to-deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout deployment branch
