@@ -53,7 +53,7 @@ jobs:
           
       - name: Merge commit SHA to release
         run: |
-          git merge ${{ github.sha }} -X  release --no-ff -m "Merge approved changes from main ${GITHUB_SHA} to release"
+          git merge ${{ github.sha }} -X --no-ff -m "Merge approved changes from main ${GITHUB_SHA} to release"
           git push origin release
 
 
