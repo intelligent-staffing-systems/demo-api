@@ -62,7 +62,7 @@ jobs:
         run: echo "Merge to Release Branch pending approval."
 
   merge-and-cleanup:
-    needs: wait-for-approval-post-testing
+    needs: wait-for-approval-to-merge
     permissions:
       contents: write
     runs-on: ubuntu-latest
