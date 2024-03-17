@@ -1,4 +1,8 @@
 name: Deployment to Performance Environment
+# notes:
+# It's useful to recognize that this workflow is designed to be triggered by a merge to the default branch. 
+# Therefore, ${{ github.sha }} will always be in reference to the SHA that originally triggered this workflow. 
+# $GITHUB_SHA, on the other hand, is created whenever actions/checkout@v4 is run
 
 on:
   push:
@@ -21,6 +25,7 @@ jobs:
       - name: Pause for manual approval
         run: echo "Deployment paused for manual approval."
 
+# this job deploys the SHA that triggered this workflow and records the main
   deploy-to-performance:
     needs: wait-for-approval-to-deploy
     runs-on: ubuntu-latest
@@ -28,7 +33,8 @@ jobs:
       - name: Deploy using commit SHA
         run: |
           echo "Deploying commit SHA ${{ github.sha }}"
-          # Add your deployment script here
+
+# Another approval needed here
 
   merge-to-release:
     needs: deploy-to-performance
@@ -47,7 +53,7 @@ jobs:
           
       - name: Merge commit SHA to release
         run: |
-          git merge ${{ github.sha }} -X release --no-ff -m "Merge approved changes from main ${GITHUB_SHA} to release"
+          git merge ${{ github.sha }} -X  release --no-ff -m "Merge approved changes from main ${GITHUB_SHA} to release"
           git push origin release
 
 
