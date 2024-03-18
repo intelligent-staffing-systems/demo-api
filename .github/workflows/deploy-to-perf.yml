@@ -57,11 +57,11 @@ jobs:
       - name: Merge commit SHA to release
         run: |
           git merge ${{ github.sha }} --no-squash -X theirs
-          git add -A
-          git commit -m 'resolved merge conflicts by accepting changed from main'
+          # git add -A
+          # git commit -m 'resolved merge conflicts by accepting changed from main'
           # git merge -X ${{ github.sha }} --no-ff -m "Merge approved changes from main ${GITHUB_SHA} to release"
           # git push origin release
-          # git push
+          git push
 
 # git merge main --no-squash
 # # git checkout --theirs .
