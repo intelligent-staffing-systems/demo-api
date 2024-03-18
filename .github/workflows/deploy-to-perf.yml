@@ -21,6 +21,8 @@ jobs:
 
   approval-to-deploy:
     needs: prepare-deployment
+    with:
+      environment: perf
     runs-on: ubuntu-latest
     steps:
       - name: Pause for manual approval
