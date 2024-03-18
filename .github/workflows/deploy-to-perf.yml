@@ -46,7 +46,7 @@ jobs:
     # These permissions are needed to write to the release branch
     permissions:
       contents: write
-    needs: wait-for-approval-t
+    needs: approval-to-merge-to-release-branch
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release branch
