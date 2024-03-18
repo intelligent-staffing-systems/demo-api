@@ -10,29 +10,29 @@ on:
       - main
 
 jobs:
-  prepare-deployment:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # prepare-deployment:
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Checkout code
+        # uses: actions/checkout@v4
 
-      # Add steps for build or test here
+      # # Add steps for build or test here
 
-  wait-for-approval-to-deploy:
-    needs: prepare-deployment
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pause for manual approval
-        run: echo "Deployment paused for manual approval."
+  # wait-for-approval-to-deploy:
+    # needs: prepare-deployment
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Pause for manual approval
+        # run: echo "Deployment paused for manual approval."
 
-# this job deploys the SHA that triggered this workflow and records the main
-  deploy-to-performance:
-    needs: wait-for-approval-to-deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy using commit SHA
-        run: |
-          echo "Deploying commit SHA ${{ github.sha }}"
+# # this job deploys the SHA that triggered this workflow and records the main
+  # deploy-to-performance:
+    # needs: wait-for-approval-to-deploy
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Deploy using commit SHA
+        # run: |
+          # echo "Deploying commit SHA ${{ github.sha }}"
 
 # Another approval needed here
 
