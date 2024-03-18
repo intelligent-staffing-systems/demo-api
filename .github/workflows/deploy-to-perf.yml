@@ -40,7 +40,7 @@ jobs:
     # These permissions are needed to write to the release branch
     permissions:
       contents: write
-    needs: deploy-to-performance
+    # needs: deploy-to-performance
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release branch
