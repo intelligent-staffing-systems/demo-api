@@ -10,37 +10,42 @@ on:
       - main
 
 jobs:
-  # prepare-deployment:
-    # runs-on: ubuntu-latest
-    # steps:
-      # - name: Checkout code
-        # uses: actions/checkout@v4
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # # Add steps for build or test here
+      # Add steps for build or test here
 
-  # wait-for-approval-to-deploy:
-    # needs: prepare-deployment
-    # runs-on: ubuntu-latest
-    # steps:
-      # - name: Pause for manual approval
-        # run: echo "Deployment paused for manual approval."
+  approval-to-deploy:
+    needs: prepare-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: echo "Deployment paused for manual approval."
 
-# # this job deploys the SHA that triggered this workflow and records the main
-  # deploy-to-performance:
-    # needs: wait-for-approval-to-deploy
-    # runs-on: ubuntu-latest
-    # steps:
-      # - name: Deploy using commit SHA
-        # run: |
-          # echo "Deploying commit SHA ${{ github.sha }}"
+# this job deploys the SHA that triggered this workflow and records the main
+  deploy-to-performance:
+    needs: approval-to-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy using commit SHA
+        run: |
+          echo "Deploying commit SHA ${{ github.sha }}"
 
-# Another approval needed here
+  approval-to-merge-to-release-branch:
+    needs: deploy-to-performance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: echo "Deployment paused for manual approval."
 
   merge-to-release:
     # These permissions are needed to write to the release branch
     permissions:
       contents: write
-    # needs: deploy-to-performance
+    needs: wait-for-approval-t
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release branch
@@ -57,15 +62,5 @@ jobs:
       - name: Merge commit SHA to release
         run: |
           git merge ${{ github.sha }} --no-squash -X theirs
-          # git add -A
-          # git commit -m 'resolved merge conflicts by accepting changed from main'
-          # git merge -X ${{ github.sha }} --no-ff -m "Merge approved changes from main ${GITHUB_SHA} to release"
-          # git push origin release
           git push
-
-# git merge main --no-squash
-# # git checkout --theirs .
-# # git add .
-# git commit -m 'resolved merge conflicts by accepting changed from main'
-# git commit -m 'resolved merge conflicts by accepting changed from main'
 
