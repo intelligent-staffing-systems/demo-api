@@ -16,13 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Add steps for build or test here
-
-
   approval-to-deploy:
     needs: prepare-deployment
-    with:
-      environment: perf
+    environment: 
+      name: perf
     runs-on: ubuntu-latest
     steps:
       - name: Pause for manual approval
@@ -39,6 +36,8 @@ jobs:
 
   approval-to-merge-to-release-branch:
     needs: deploy-to-performance
+    environment: 
+      name: perf
     runs-on: ubuntu-latest
     steps:
       - name: Pause for manual approval
