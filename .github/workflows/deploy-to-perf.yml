@@ -1,4 +1,8 @@
 name: Deployment to Performance Environment
+# notes:
+# It's useful to recognize that this workflow is designed to be triggered by a merge to the default branch. 
+# Therefore, ${{ github.sha }} will always be in reference to the SHA that originally triggered this workflow. 
+# $GITHUB_SHA, on the other hand, is created whenever actions/checkout@v4 is run
 
 on:
   push:
@@ -6,91 +10,62 @@ on:
       - main
 
 jobs:
-  prepare-deployment:
-    runs-on: ubuntu-latest
+  # prepare-deployment:
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Checkout code
+        # uses: actions/checkout@v4
+
+      # # Add steps for build or test here
+
+  # wait-for-approval-to-deploy:
+    # needs: prepare-deployment
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Pause for manual approval
+        # run: echo "Deployment paused for manual approval."
+
+# # this job deploys the SHA that triggered this workflow and records the main
+  # deploy-to-performance:
+    # needs: wait-for-approval-to-deploy
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Deploy using commit SHA
+        # run: |
+          # echo "Deploying commit SHA ${{ github.sha }}"
+
+# Another approval needed here
+
+  merge-to-release:
+    # These permissions are needed to write to the release branch
     permissions:
       contents: write
-    outputs:
-      deploy_branch: ${{ steps.create_branch.outputs.branch }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set commit hash for deployment
-        id: set-hash
-        run: echo "commit-hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Create local testing branch
-        id: create_branch
-        run: |
-          TEMP_BRANCH="local-testing-${{ steps.set-hash.outputs.commit-hash }}"
-          echo "branch=$TEMP_BRANCH" >> $GITHUB_OUTPUT
-          git checkout -b $TEMP_BRANCH
-
-      - name: Push the temporary branch to remote
-        run: |
-          git push -u origin ${{ steps.create_branch.outputs.branch }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  wait-for-approval-to-deploy:
-    needs: prepare-deployment
-    runs-on: ubuntu-latest
-    environment: 
-      name: perf
-    steps:
-      - name: Pause for manual approval
-        run: echo "Deployment paused for manual approval in the 'perf' environment."
-
-  deploy-to-performance:
-    needs: wait-for-approval-to-deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout deployment branch
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ needs.prepare-deployment.outputs.deploy_branch }}
-
-  wait-for-approval-post-testing:
-    needs: deploy-to-performance
-    runs-on: ubuntu-latest
-    environment: 
-      name: perf
-    steps:
-      - name: Pause for manual approval
-        run: echo "Deployment paused for manual approval in the 'perf' environment."
-
-  merge-and-cleanup:
-    needs: wait-for-approval-post-testing
-    permissions:
-      contents: write
+    # needs: deploy-to-performance
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: release
+          fetch-depth: 0
 
-      - name: Merge to release branch
+      - name: Setup git user
         run: |
-          git checkout release
-          git merge ${{ needs.prepare-deployment.outputs.deploy_branch }}
-          git push origin release
+            git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+            git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+          
+      - name: Merge commit SHA to release
+        run: |
+          git merge ${{ github.sha }} --no-squash -X theirs
+          # git add -A
+          # git commit -m 'resolved merge conflicts by accepting changed from main'
+          # git merge -X ${{ github.sha }} --no-ff -m "Merge approved changes from main ${GITHUB_SHA} to release"
+          # git push origin release
+          git push
 
-    # - name: Merge changes into release
-      # run: |
-        # git config user.name "github-actions"
-        # git config user.email "github-actions@github.com"
-        # git merge ${{ needs.trigger-deployment.outputs.TEMP_BRANCH }} --no-ff -m "Merging approved changes into release"
-        # git push origin release
-
-    # - name: Cleanup temporary branch
-      # uses: actions/github-script@v5
-      # with:
-        # script: |
-          # github.git.deleteRef({
-            # owner: context.repo.owner,
-            # repo: context.repo.repo,
-            # ref: 'heads/${{ needs.trigger-deployment.outputs.TEMP_BRANCH }}'
-          # })
+# git merge main --no-squash
+# # git checkout --theirs .
+# # git add .
+# git commit -m 'resolved merge conflicts by accepting changed from main'
+# git commit -m 'resolved merge conflicts by accepting changed from main'
 
