@@ -55,6 +55,8 @@ jobs:
     # secrets: inherit
 
   pre-tag-summary:
+    permissions:
+      contents: write
     # needs: deploy-to-perf
     needs: approval-to-deploy
     uses: ./.github/workflows/pre-tag-summary.yml
