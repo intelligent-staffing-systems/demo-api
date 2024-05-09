@@ -53,7 +53,8 @@ jobs:
     # secrets: inherit
 
   pre-tag-summary:
-    needs: deploy-to-perf
+    # needs: deploy-to-perf
+    needs: approval-to-deploy
     uses: ./.github/workflows/pre-tag-summary.yml
     secrets: inherit
 
@@ -76,12 +77,11 @@ jobs:
       - name: Checkout release branch
         uses: actions/checkout@v4
         with:
-          # ref: release
-          ref: 1727-hotfix-pat-test
+          ref: release
           fetch-depth: 0
           # Fine-grained PAT with contents:write and workflows:write
           # scopes
-          token: ${{ secrets.CD_PAT }}
+          # token: ${{ secrets.CD_PAT }}
 
       - name: Setup git user
         # The following is taken from https://github.com/actions/checkout/issues/13 as a common work-around
@@ -94,10 +94,10 @@ jobs:
           git merge ${{ github.sha }} --no-squash -X theirs
           git push
 
-  create-and-post-tag:
-    needs: merge-to-release
-    uses: ./.github/workflows/create-and-post-tag.yml
-    secrets: inherit
+  # create-and-post-tag:
+    # needs: merge-to-release
+    # uses: ./.github/workflows/create-and-post-tag.yml
+    # secrets: inherit
 
   # deploy-to-staging:
     # needs: merge-to-release 
@@ -108,12 +108,12 @@ jobs:
       # lambdaDeploy: true
     # secrets: inherit
 
-  QA-approval-of-staging:
-    needs: deploy-to-staging
-    environment: 
-      name: prod-deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pause for manual approval
-        run: echo "Pipeline paused for pending approval of staging by QA"
+  # QA-approval-of-staging:
+    # needs: deploy-to-staging
+    # environment: 
+      # name: prod-deploy
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Pause for manual approval
+        # run: echo "Pipeline paused for pending approval of staging by QA"
 
