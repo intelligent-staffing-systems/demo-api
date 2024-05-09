@@ -27,6 +27,8 @@ jobs:
         uses: actions/checkout@v4
 
   pr-label-summary:
+    permissions:
+      contents: write
     needs: prepare-deployment
     uses: ./.github/workflows/pr-label-semver.yml
     secrets: inherit
