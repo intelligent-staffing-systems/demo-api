@@ -9,8 +9,8 @@ on:
 jobs:
   test-merge-workflow-to-a-branch:
     # These permissions are needed to write to the release branch
-    permissions:
-      contents: write
+    # permissions:
+      # contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release branch
