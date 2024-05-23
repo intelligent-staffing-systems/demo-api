@@ -1,0 +1,123 @@
+name: Continuous Deployment Pipeline
+# note:
+# It's useful to recognize that this workflow is designed to be triggered by a merge to the default branch. 
+# Therefore, ${{ github.sha }} will always be in reference to the SHA that originally triggered this workflow. 
+# $GITHUB_SHA, on the other hand, is created whenever actions/checkout@v4 is run
+
+# note:
+# environment:
+  # name:
+# is keyword for using the environment protections.
+
+# with: 
+  # environment:
+# is simply using a variable named environment 
+  
+on:
+  # push:
+    # branches:
+      # - master
+
+jobs:
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  pr-label-summary:
+    needs: prepare-deployment
+    uses: ./.github/workflows/pr-label-semver.yml
+    secrets: inherit
+
+  approval-to-deploy:
+    needs: pr-label-summary
+    environment: 
+      name: perf-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: |
+          echo "Deploying commit SHA ${{ github.sha }}, the latest merge to master"
+          echo "Deployment paused for manual approval."
+
+# this job deploys the SHA that triggered this workflow
+  deploy-to-perf:
+    needs: approval-to-deploy
+    uses: ./.github/workflows/dev_deploy.yml
+    with:
+      environment: perf
+      ref: ${{ github.sha }}
+      lambdaDeploy: true
+    secrets: inherit
+
+  pre-tag-summary:
+    needs: deploy-to-perf
+    uses: ./.github/workflows/pre-tag-summary.yml
+    secrets: inherit
+
+  approval-to-merge-to-release-branch:
+    needs: pre-tag-summary
+    environment: 
+      name: perf-merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: echo "Deployment paused for manual approval."
+
+  merge-to-release:
+    # These permissions are needed to write to the release branch
+    permissions:
+      contents: write
+    needs: approval-to-merge-to-release-branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release
+          fetch-depth: 0
+          # Fine-grained PAT with contents:write and workflows:write
+          # scopes
+          token: ${{ secrets.CD_PAT }}
+
+      - name: Setup git user
+        # The following is taken from https://github.com/actions/checkout/issues/13 as a common work-around
+        run: |
+            git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+            git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+          
+      - name: Merge commit SHA to release
+        run: |
+          git merge ${{ github.sha }} --no-squash -X theirs
+          git push
+
+  create-and-post-tag:
+    needs: merge-to-release
+    uses: ./.github/workflows/create-and-post-tag.yml
+    secrets: inherit
+
+  create-release-notes:
+    needs: create-and-post-tag
+    uses: ./.github/workflows/create-release-notes.yml
+    secrets: inherit
+    with:
+      previous_version: ${{ needs.create-and-post-tag.outputs.previous_version }}
+
+  deploy-to-staging:
+    needs: merge-to-release 
+    uses: ./.github/workflows/dev_deploy.yml
+    with:
+      environment: staging
+      ref: release
+      lambdaDeploy: true
+    secrets: inherit
+
+  QA-approval-of-staging:
+    needs: deploy-to-staging
+    environment: 
+      name: prod-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: echo "Pipeline paused for pending approval of staging by QA"
