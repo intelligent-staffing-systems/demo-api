@@ -43,9 +43,9 @@ async function generateReleaseNotes(github, owner, repo, tag_name, previous_tag_
       owner,
       repo,
       tag_name,
-      target_commitish: 'main',
+      // target_commitish: 'main',
       previous_tag_name,
-      configuration_file_path: ".github/release.yaml",
+      // configuration_file_path: ".github/release.yaml",
     });
 
     const releaseNotes = response.data.body;
