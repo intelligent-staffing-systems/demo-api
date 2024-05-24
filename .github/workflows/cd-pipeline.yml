@@ -18,7 +18,8 @@ on:
     branches:
       # - master
       - 1721-publish-release-notes
-      - main
+      # - main
+      - 1721-demo-api
 
 jobs:
   prepare-deployment:
