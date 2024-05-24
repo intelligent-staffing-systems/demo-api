@@ -69,6 +69,7 @@ async function generateReleaseNotes(
       owner,
       repo,
       tag_name,
+	  target_commitish: 'main',
       previous_tag_name,
       configuration_file_path: ".github/release.yaml",
     });
