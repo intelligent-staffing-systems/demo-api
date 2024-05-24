@@ -60,14 +60,14 @@ jobs:
     uses: ./.github/workflows/pre-tag-summary.yml
     secrets: inherit
 
-  approval-to-merge-to-release-branch:
-    needs: pre-tag-summary
-    environment: 
-      name: perf-merge
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pause for manual approval
-        run: echo "Deployment paused for manual approval."
+  # approval-to-merge-to-release-branch:
+    # needs: pre-tag-summary
+    # environment: 
+      # name: perf-merge
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Pause for manual approval
+        # run: echo "Deployment paused for manual approval."
 
   # merge-to-release:
     # # These permissions are needed to write to the release branch
@@ -98,8 +98,8 @@ jobs:
 
   create-and-post-tag:
     # needs: merge-to-release
-    # needs: pre-tag-summary
-    needs: approval-to-merge-to-release-branch
+    needs: pre-tag-summary
+    # needs: approval-to-merge-to-release-branch
     uses: ./.github/workflows/create-and-post-tag.yml
     secrets: inherit
 
@@ -119,17 +119,18 @@ jobs:
       ref: ${{ needs.create-and-post-tag.outputs.newVersion }}
       lambdaDeploy: true
 
-  QA-approval-of-staging:
-    needs: deploy-to-staging
-    environment: 
-      name: prod-deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pause for manual approval
-        run: echo "Pipeline paused for pending approval of staging by QA"
+  # QA-approval-of-staging:
+    # needs: deploy-to-staging
+    # environment: 
+      # name: prod-deploy
+    # runs-on: ubuntu-latest
+    # steps:
+      # - name: Pause for manual approval
+        # run: echo "Pipeline paused for pending approval of staging by QA"
 
   publish-release-notes:
-    needs: QA-approval-of-staging
+    # needs: QA-approval-of-staging
+    needs: deploy-to-staging
     uses: ./.github/workflows/publish-release-notes.yml
     secrets: inherit
     with:
