@@ -21,6 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: List .github directory contents
+        run: ls -R .github
+
       - name: Create Release Notes
         id: create_notes
         uses: actions/github-script@v7
@@ -31,5 +34,14 @@ jobs:
           # This script outputs draftReleaseReference for publish-release-notes.yml
           script: |
             const createReleaseNotes = require('.github/scripts/createReleaseNotes.js');
+            const fs = require('fs');
+            const path = require('path');
+
+            // Log current working directory
+            console.log('Current directory:', process.cwd());
+
+            // Log .github directory contents
+            console.log('Files in .github directory:', fs.readdirSync(path.join(process.cwd(), '.github')));
+
             createReleaseNotes({github, context, core});
 

@@ -1,27 +1,13 @@
-// createReleaseNotes.js
 const { appendSummary, getReleaseVersionValue } = require("./actionUtils");
+const fs = require('fs');
+const path = require('path');
 
-/**
- * Formats the current date in a specific string format for use in release titles.
- *
- * @returns {string} The formatted date string in the format: DD MMM YYYY (e.g., "15 MAY 2024").
- */
-function formatDate() {
+async function formatDate() {
   const date = new Date();
   const options = { day: "2-digit", month: "short", year: "numeric" };
   return date.toLocaleDateString("en-US", options).toUpperCase();
 }
 
-/**
- * Creates a draft release on GitHub with a specified tag and release notes.
- *
- * @param {Object} github The authenticated GitHub API client instance.
- * @param {string} owner The username or organization name on GitHub that owns the repository.
- * @param {string} repo The repository name.
- * @param {string} tag_name The tag associated with the release.
- * @param {string} body The content of the release notes.
- * @returns {Promise<string>} A Promise that resolves with the URL of the newly created draft release.
- */
 async function createDraftRelease(github, owner, repo, tag_name, body) {
   try {
     const response = await github.rest.repos.createRelease({
@@ -37,56 +23,40 @@ async function createDraftRelease(github, owner, repo, tag_name, body) {
     const releaseUrl = response.data.html_url;
     const draftReleaseReference = response.data.id;
 
-    console.log("the response is:", response.data);
+    console.log("The response is:", response.data);
     console.log("The release URL is: ", releaseUrl);
     console.log("The draftReleaseReference is: ", draftReleaseReference);
 
     return { releaseUrl, draftReleaseReference };
   } catch (error) {
-    console.error("Error creating release:", error);
+    console.error(`Error creating release for ${tag_name} in ${owner}/${repo}:`, error);
+    throw new Error(`Failed to create draft release: ${error.message}`);
   }
 }
 
-/**
- * Generates release notes by comparing the current tag with a previous tag using GitHub's API.
- *
- * @param {Object} github The authenticated GitHub API client instance.
- * @param {string} owner The username or organization name on GitHub that owns the repository.
- * @param {string} repo The repository name.
- * @param {string} tag_name The current tag for which to generate release notes.
- * @param {string} previous_tag_name The previous tag to compare against for generating release notes.
- * @returns {Promise<Object>} A Promise that resolves with an object containing the response and the generated release notes.
- */
-async function generateReleaseNotes(
-  github,
-  owner,
-  repo,
-  tag_name,
-  previous_tag_name,
-) {
+async function generateReleaseNotes(github, owner, repo, tag_name, previous_tag_name) {
   try {
+    console.log('Current directory:', process.cwd());
+    console.log('Files in .github directory:', fs.readdirSync(path.join(process.cwd(), '.github')));
+
     const response = await github.rest.repos.generateReleaseNotes({
       owner,
       repo,
       tag_name,
-	  target_commitish: 'main',
+      target_commitish: 'main',
       previous_tag_name,
       configuration_file_path: ".github/release.yaml",
     });
+
     const releaseNotes = response.data.body;
     console.log("Release notes generated successfully: ", releaseNotes);
     return { releaseNotes };
   } catch (error) {
     console.error("Error generating release notes:", error);
+    throw error;
   }
 }
 
-/**
- * Main function to create release notes, create a draft release, and append a summary.
- *
- * @param {Object} params An object containing the GitHub API client, the GitHub context, and the GitHub core library.
- * @returns {Promise<void>} A Promise that resolves with no value indicating the successful creation and summary of release notes.
- */
 async function createReleaseNotes(params) {
   const { github, context, core } = params;
   const { previousVersion } = process.env;
@@ -94,10 +64,7 @@ async function createReleaseNotes(params) {
   const repo = context.repo.repo;
 
   try {
-    // get currentVersion for release and release notes
     const currentVersion = await getReleaseVersionValue(github, owner, repo);
-
-    // generate release notes based on the previousVersion
     const { releaseNotes } = await generateReleaseNotes(
       github,
       owner,
@@ -106,7 +73,6 @@ async function createReleaseNotes(params) {
       previousVersion,
     );
 
-    // create release, attach generated notes, and return the url for the step summary and the id of the created draft
     const { releaseUrl, draftReleaseReference } = await createDraftRelease(
       github,
       owner,
@@ -115,8 +81,7 @@ async function createReleaseNotes(params) {
       releaseNotes,
     );
 
-    // Make a github summary that provides a link to the draft release and notifies of successful creation
-    summaryContent = `
+    const summaryContent = `
 ### Release Notes Created!
 [Link to the draft release notes](${releaseUrl})
 Draft notes created based on the update to ${currentVersion} 
@@ -125,7 +90,6 @@ The draft release reference is ${draftReleaseReference}
     `;
     appendSummary(core, summaryContent);
 
-    // Output the draftReleaseReference so it can be published upon QA approval of the staging deploy
     core.setOutput("draftReleaseReference", draftReleaseReference);
 
     console.log(`The previous release version was: ${previousVersion}`);
