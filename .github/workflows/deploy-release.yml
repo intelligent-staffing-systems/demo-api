@@ -59,4 +59,4 @@ jobs:
         run: |
           echo "checked out tag: ${{ env.TAG }}"
           echo "the environment is ${{ env.ENV }}"
-
+    needs: pre-tag-summary
