@@ -18,3 +18,4 @@ jobs:
             const path = '.github/scripts/prLabelSemver.js';
             const prLabelSemver = require(path);
             prLabelSemver({github, context, core});
+
