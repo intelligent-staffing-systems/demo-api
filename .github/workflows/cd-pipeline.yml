@@ -93,10 +93,10 @@ jobs:
             git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
             git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
           
-      # - name: Merge commit SHA to release
-        # run: |
-          # git merge ${{ github.sha }} --no-squash -X theirs
-          # git push
+      - name: Merge commit SHA to release
+        run: |
+          git merge ${{ github.sha }} --no-squash -X theirs
+          git push
 
   create-and-post-tag:
     needs: merge-to-release
