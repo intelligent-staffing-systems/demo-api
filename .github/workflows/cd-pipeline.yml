@@ -19,7 +19,7 @@ on:
       # - master
       # - 1721-publish-release-notes
       - 1721-demo-api
-      # - main
+      - main
 
 jobs:
   prepare-deployment:
@@ -33,46 +33,44 @@ jobs:
     uses: ./.github/workflows/pr-label-semver.yml
     secrets: inherit
 
-  # approval-to-deploy:
-    # needs: pr-label-summary
-    # environment: 
-      # name: perf-deploy
-    # runs-on: ubuntu-latest
-    # steps:
-      # - name: Pause for manual approval
-        # run: |
-          # echo "Deploying commit SHA ${{ github.sha }}, the latest merge to master"
-          # echo "Deployment paused for manual approval."
+  approval-to-deploy:
+    needs: pr-label-summary
+    environment: 
+      name: perf-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: |
+          echo "Deploying commit SHA ${{ github.sha }}, the latest merge to master"
+          echo "Deployment paused for manual approval."
 
-# # this job deploys the SHA that triggered this workflow
-  # deploy-to-perf:
-    # needs: approval-to-deploy
-    # uses: ./.github/workflows/dev_deploy.yml
-    # secrets: inherit
-    # with:
-      # environment: perf
-      # ref: ${{ github.sha }}
-      # lambdaDeploy: true
+  # this job deploys the SHA that triggered this workflow
+  deploy-to-perf:
+    needs: approval-to-deploy
+    uses: ./.github/workflows/dev_deploy.yml
+    secrets: inherit
+    with:
+      environment: perf
+      ref: ${{ github.sha }}
+      lambdaDeploy: true
 
   pre-tag-summary:
-    # needs: deploy-to-perf
-    # needs: approval-to-deploy
+    needs: deploy-to-perf
     needs: pr-label-summary
     uses: ./.github/workflows/pre-tag-summary.yml
     secrets: inherit
 
-  # approval-to-merge-to-release-branch:
-    # needs: pre-tag-summary
-    # environment: 
-      # name: perf-merge
-    # runs-on: ubuntu-latest
-    # steps:
-      # - name: Pause for manual approval
-        # run: echo "Deployment paused for manual approval."
+  approval-to-merge-to-release-branch:
+    needs: pre-tag-summary
+    environment: 
+      name: perf-merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: echo "Deployment paused for manual approval."
 
   merge-to-release:
-    # needs: approval-to-merge-to-release-branch
-    needs: pre-tag-summary
+    needs: approval-to-merge-to-release-branch
     # These permissions are needed to write to the release branch
     permissions:
       contents: write
@@ -93,10 +91,10 @@ jobs:
             git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
             git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
           
-      # - name: Merge commit SHA to release
-        # run: |
-          # git merge ${{ github.sha }} --no-squash -X theirs
-          # git push
+      - name: Merge commit SHA to release
+        run: |
+          git merge ${{ github.sha }} --no-squash -X theirs
+          git push
 
   create-and-post-tag:
     needs: merge-to-release

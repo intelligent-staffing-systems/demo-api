@@ -1,0 +1,95 @@
+name: Deploy to Env - API
+run-name: "Deploy API to ${{ inputs.environment }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment to deploy
+        default: dev
+        options:
+          - dev
+          - perf
+          - staging
+          - prod
+      ref:
+        description: "Branch or Commit"
+        default: master
+        required: true
+        type: string
+      lambdaDeploy:
+        description: "Include Lambda in deployment?"
+        default: false
+        required: false
+        type: boolean
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      ref:
+        required: true
+        type: string
+      lambdaDeploy:
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  setup-environment:
+    name: "setup-env-${{ inputs.environment }}"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      git-hash: ${{ steps.set-hash.outputs.commit-hash }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set Hash
+        id: set-hash
+        run: |
+          echo "commit-hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Env Values
+        run: |
+          echo "The environment is ${{ inputs.environment }}"
+          echo "The branch/tag is ${{ inputs.ref }}"
+          echo "The commit hash is ${{ steps.set-hash.outputs.commit-hash }}"
+
+  run-build:
+    needs: [setup-environment]
+    uses: ./.github/workflows/build.yml
+    with:
+      environment: "${{ inputs.environment }}"
+      ref: "${{ needs.setup-environment.outputs.git-hash }}"
+    secrets: inherit
+
+  run-lambda-deploy:
+    if: ${{ inputs.lambdaDeploy }}
+    needs: [setup-environment]
+    uses: ./.github/workflows/lambda-functions.yml
+    with:
+      environment: "${{ inputs.environment }}"
+      ref: "${{ needs.setup-environment.outputs.git-hash }}"
+      lambdaName: "All"
+    secrets: inherit
+
+  run-deployment:
+    needs: [setup-environment, run-build]
+    uses: ./.github/workflows/deployment.yml
+    with:
+      environment: "${{ inputs.environment }}"
+      ref: "${{ needs.setup-environment.outputs.git-hash }}"
+    secrets: inherit
+
+  run-qa-suite:
+    needs: [run-deployment]
+    uses: ./.github/workflows/run-regression.yml
+    with:
+      environment: "${{ inputs.environment }}"
+    secrets: inherit
+
