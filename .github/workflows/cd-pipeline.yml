@@ -109,8 +109,6 @@ jobs:
     secrets: inherit
     with:
       previousVersion: ${{ needs.create-and-post-tag.outputs.previousVersion }}
-    outputs:
-      draftReleaseReference: ${{ steps.create-release-notes.outputs.draftReleaseReference }}
 
   deploy-to-staging:
     needs: create-release-notes
@@ -120,8 +118,6 @@ jobs:
       environment: staging
       ref: ${{ needs.create-and-post-tag.outputs.newVersion }}
       lambdaDeploy: true
-    outputs:
-      draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
 
   QA-approval-of-staging:
     needs: deploy-to-staging
@@ -131,13 +127,11 @@ jobs:
     steps:
       - name: Pause for manual approval
         run: echo "Pipeline paused for pending approval of staging by QA"
-    outputs:
-      draftReleaseReference: ${{ needs.deploy-to-staging.outputs.draftReleaseReference }}
 
   publish-release-notes:
-    needs: QA-approval-of-staging
+    needs: [create-release-notes, QA-approval-of-staging]
     uses: ./.github/workflows/publish-release-notes.yml
     secrets: inherit
     with:
-      draftReleaseReference: ${{ needs.QA-approval-of-staging.outputs.draftReleaseReference }}
+      draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
 
