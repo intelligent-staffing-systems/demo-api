@@ -109,31 +109,35 @@ jobs:
     secrets: inherit
     with:
       previousVersion: ${{ needs.create-and-post-tag.outputs.previousVersion }}
+    outputs:
+      draftReleaseReference: ${{ steps.create-release-notes.outputs.draftReleaseReference }}
 
-  # deploy-to-staging:
-    # needs: create-release-notes
-    # uses: ./.github/workflows/deploy-release.yml
-    # secrets: inherit
-    # with:
-      # environment: staging
-      # ref: ${{ needs.create-and-post-tag.outputs.newVersion }}
-      # lambdaDeploy: true
+  deploy-to-staging:
+    needs: create-release-notes
+    uses: ./.github/workflows/deploy-release.yml
+    secrets: inherit
+    with:
+      environment: staging
+      ref: ${{ needs.create-and-post-tag.outputs.newVersion }}
+      lambdaDeploy: true
+    outputs:
+      draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
 
-  # QA-approval-of-staging:
-    # needs: deploy-to-staging
-    # environment: 
-      # name: prod-deploy
-    # runs-on: ubuntu-latest
-    # steps:
-      # - name: Pause for manual approval
-        # run: echo "Pipeline paused for pending approval of staging by QA"
+  QA-approval-of-staging:
+    needs: deploy-to-staging
+    environment: 
+      name: prod-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause for manual approval
+        run: echo "Pipeline paused for pending approval of staging by QA"
+    outputs:
+      draftReleaseReference: ${{ needs.deploy-to-staging.outputs.draftReleaseReference }}
 
   publish-release-notes:
-    # needs: QA-approval-of-staging
-    # needs: deploy-to-staging
-    needs: create-release-notes
+    needs: QA-approval-of-staging
     uses: ./.github/workflows/publish-release-notes.yml
     secrets: inherit
     with:
-      draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
+      draftReleaseReference: ${{ needs.QA-approval-of-staging.outputs.draftReleaseReference }}
 
