@@ -16,7 +16,6 @@ name: Continuous Deployment Pipeline
 on:
   push:
     branches:
-      # - master
       - main
 
 jobs:
