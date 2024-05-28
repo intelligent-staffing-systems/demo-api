@@ -3,7 +3,7 @@
 # dev_deploy.yml only deploys hashes - this workflow ensures the tag is deployed
 # this ensures the tag name shows up correctly in Datadog for deployment tracking
 name: Deploy API Release
-run-name: "Deploy Release to ${{ inputs.environment }}"
+run-name: 'Deploy Release to ${{ inputs.environment }}'
 
 on:
   workflow_dispatch:
@@ -18,12 +18,12 @@ on:
           - staging
           - prod
       ref:
-        description: "Tag, branch, or commit"
+        description: 'Tag, branch, or commit'
         default: master
         required: true
         type: string
       lambdaDeploy:
-        description: "Include Lambda in deployment?"
+        description: 'Include Lambda in deployment?'
         default: true
         required: false
         type: boolean
@@ -33,12 +33,12 @@ on:
         type: string
         default: dev
       ref:
-        default: "dev"
-        description: "Tag, branch, or commit"
+        default: 'dev'
+        description: 'Tag, branch, or commit'
         required: true
         type: string
       lambdaDeploy:
-        description: "Include Lambda in deployment?"
+        description: 'Include Lambda in deployment?'
         default: true
         required: false
         type: boolean
@@ -49,7 +49,7 @@ env:
 
 jobs:
   setup-environment:
-    name: "setup-env"
+    name: 'setup-env'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -85,7 +85,7 @@ jobs:
     with:
       environment: ${{ needs.setup-environment.outputs.environment }}
       ref: ${{ needs.setup-environment.outputs.tag }}
-      lambdaName: "All"
+      lambdaName: 'All'
     secrets: inherit
 
   run-deployment:
@@ -102,4 +102,3 @@ jobs:
     with:
       environment: ${{ needs.setup-environment.outputs.environment }}
     secrets: inherit
-

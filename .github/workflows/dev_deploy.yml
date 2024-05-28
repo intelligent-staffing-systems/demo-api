@@ -1,5 +1,5 @@
 name: Deploy to Env - API
-run-name: "Deploy API to ${{ inputs.environment }}"
+run-name: 'Deploy API to ${{ inputs.environment }}'
 
 on:
   workflow_dispatch:
@@ -14,12 +14,12 @@ on:
           - staging
           - prod
       ref:
-        description: "Branch or Commit"
+        description: 'Branch or Commit'
         default: master
         required: true
         type: string
       lambdaDeploy:
-        description: "Include Lambda in deployment?"
+        description: 'Include Lambda in deployment?'
         default: false
         required: false
         type: boolean
@@ -38,7 +38,7 @@ on:
 
 jobs:
   setup-environment:
-    name: "setup-env-${{ inputs.environment }}"
+    name: 'setup-env-${{ inputs.environment }}'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     outputs:
@@ -64,8 +64,8 @@ jobs:
     needs: [setup-environment]
     uses: ./.github/workflows/build.yml
     with:
-      environment: "${{ inputs.environment }}"
-      ref: "${{ needs.setup-environment.outputs.git-hash }}"
+      environment: '${{ inputs.environment }}'
+      ref: '${{ needs.setup-environment.outputs.git-hash }}'
     secrets: inherit
 
   run-lambda-deploy:
@@ -73,23 +73,22 @@ jobs:
     needs: [setup-environment]
     uses: ./.github/workflows/lambda-functions.yml
     with:
-      environment: "${{ inputs.environment }}"
-      ref: "${{ needs.setup-environment.outputs.git-hash }}"
-      lambdaName: "All"
+      environment: '${{ inputs.environment }}'
+      ref: '${{ needs.setup-environment.outputs.git-hash }}'
+      lambdaName: 'All'
     secrets: inherit
 
   run-deployment:
     needs: [setup-environment, run-build]
     uses: ./.github/workflows/deployment.yml
     with:
-      environment: "${{ inputs.environment }}"
-      ref: "${{ needs.setup-environment.outputs.git-hash }}"
+      environment: '${{ inputs.environment }}'
+      ref: '${{ needs.setup-environment.outputs.git-hash }}'
     secrets: inherit
 
   run-qa-suite:
     needs: [run-deployment]
     uses: ./.github/workflows/run-regression.yml
     with:
-      environment: "${{ inputs.environment }}"
+      environment: '${{ inputs.environment }}'
     secrets: inherit
-

@@ -1,6 +1,6 @@
 name: Publish Release Notes
 
-on: 
+on:
   workflow_call:
     inputs:
       draftReleaseReference:
@@ -23,4 +23,3 @@ jobs:
           script: |
             const publishReleaseNotes = require('.github/scripts/publishReleaseNotes.js');
             publishReleaseNotes({github, context, core});
-

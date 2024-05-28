@@ -1,6 +1,6 @@
 name: Create Release Notes
 
-on: 
+on:
   workflow_call:
     inputs:
       previousVersion:
@@ -8,7 +8,7 @@ on:
         type: string
     outputs:
       draftReleaseReference:
-        description: "This value is the id that will be used when actually publishing this release notes"
+        description: 'This value is the id that will be used when actually publishing this release notes'
         value: ${{ jobs.create-release-notes.outputs.draftReleaseReference }}
 
 jobs:
@@ -32,4 +32,3 @@ jobs:
           script: |
             const createReleaseNotes = require('.github/scripts/createReleaseNotes.js');
             createReleaseNotes({github, context, core});
-
