@@ -1,6 +1,6 @@
 // createAndPostTag.js
-const { prData } = require("./prData");
-const { appendSummary, getReleaseVersionValue } = require("./actionUtils");
+const { prData } = require('./prData');
+const { appendSummary, getReleaseVersionValue } = require('./actionUtils');
 
 /**
  * Creates a new git tag in the repository.
@@ -24,7 +24,7 @@ async function createTag(github, owner, repo, newVersion, sha) {
     tag: tagName,
     message: tagMessage,
     object: sha,
-    type: "commit",
+    type: 'commit',
   });
 
   // Create the reference in the repository (this is equivalent to pushing the tag to the repo)
@@ -69,19 +69,19 @@ async function createAndPostTag(params) {
     await createTag(github, owner, repo, newVersion, releaseBranchSha);
 
     // Update the RELEASE_VERSION repo variable
-	await github.rest.actions.updateRepoVariable({
-	  owner,
-	  repo,
-	  name: "RELEASE_VERSION",
-	  value: newVersion,
-	});
+    await github.rest.actions.updateRepoVariable({
+      owner,
+      repo,
+      name: 'RELEASE_VERSION',
+      value: newVersion,
+    });
 
     // Output previous version to the GitHub actions workflow context
     // This will be used by the workflow that sets up the release notes
-    core.setOutput("previousVersion", previousVersion);
+    core.setOutput('previousVersion', previousVersion);
 
-	// this output will be the tag used for the staging deploy
-    core.setOutput("newVersion", newVersion);
+    // this output will be the tag used for the staging deploy
+    core.setOutput('newVersion', newVersion);
 
     // Construct the summary content
     const summaryContent = `
@@ -101,4 +101,3 @@ async function createAndPostTag(params) {
 }
 
 module.exports = createAndPostTag;
-
