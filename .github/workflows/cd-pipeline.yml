@@ -106,7 +106,7 @@ jobs:
       previousVersion: ${{ needs.create-and-post-tag.outputs.previousVersion }}
 
   deploy-to-staging:
-    needs: create-and-post-tag
+    needs: create-release-notes
     uses: ./.github/workflows/deploy-release.yml
     secrets: inherit
     with:
