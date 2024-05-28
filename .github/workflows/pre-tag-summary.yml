@@ -1,6 +1,6 @@
 name: CD Pipeline Pre Tag Summary
 
-on: 
+on:
   workflow_call:
 
 jobs:

@@ -1,6 +1,6 @@
 name: CD Pipeline PR Labels and Semver bump Summary
 
-on: 
+on:
   workflow_call:
 
 jobs:
@@ -18,4 +18,3 @@ jobs:
             const path = '.github/scripts/prLabelSemver.js';
             const prLabelSemver = require(path);
             prLabelSemver({github, context, core});
-
