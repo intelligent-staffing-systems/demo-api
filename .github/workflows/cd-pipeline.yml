@@ -130,9 +130,10 @@ jobs:
 
   publish-release-notes:
     # needs: QA-approval-of-staging
-    needs: deploy-to-staging
+    needs: create-release-notes
     uses: ./.github/workflows/publish-release-notes.yml
     secrets: inherit
     with:
       draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
+
 

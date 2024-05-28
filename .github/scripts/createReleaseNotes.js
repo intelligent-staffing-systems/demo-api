@@ -70,7 +70,7 @@ async function generateReleaseNotes(
       repo,
       tag_name,
       previous_tag_name,
-      configuration_file_path: ".github/release.yaml",
+      // configuration_file_path: ".github/release.yaml",
     });
     const releaseNotes = response.data.body;
     console.log("Release notes generated successfully: ", releaseNotes);
