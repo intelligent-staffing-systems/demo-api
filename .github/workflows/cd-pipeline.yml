@@ -59,7 +59,7 @@ jobs:
   approval-to-merge-to-release-branch:
     needs: pre-tag-summary
     environment:
-      name: perf-merge
+      name: staging-deploy
     runs-on: ubuntu-latest
     steps:
       - name: Pause for manual approval
