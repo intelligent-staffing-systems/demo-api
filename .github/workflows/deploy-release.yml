@@ -3,15 +3,15 @@
 # dev_deploy.yml only deploys hashes - this workflow ensures the tag is deployed
 # this ensures the tag name shows up correctly in Datadog for deployment tracking
 name: Deploy API Release
-run-name: 'Deploy Release to ${{ inputs.environment }}'
+run-name: "Deploy Release to ${{ inputs.environment }}"
 
 on:
   workflow_dispatch:
     inputs:
       environment:
+        description: 'Environment to deploy'
+        default: 'dev'
         type: choice
-        description: Environment to deploy
-        default: dev
         options:
           - dev
           - perf
@@ -19,29 +19,27 @@ on:
           - prod
       ref:
         description: 'Tag, branch, or commit'
-        default: master
-        required: true
+        default: 'master'
         type: string
+        required: true
       lambdaDeploy:
         description: 'Include Lambda in deployment?'
         default: true
-        required: false
         type: boolean
+        required: false
   workflow_call:
     inputs:
       environment:
+        default: 'dev'
         type: string
-        default: dev
       ref:
         default: 'dev'
-        description: 'Tag, branch, or commit'
-        required: true
         type: string
+        required: true
       lambdaDeploy:
-        description: 'Include Lambda in deployment?'
         default: true
-        required: false
         type: boolean
+        required: false
 
 env:
   TAG: ${{ inputs.ref }}
@@ -49,7 +47,7 @@ env:
 
 jobs:
   setup-environment:
-    name: 'setup-env'
+    name: "setup-env"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -85,7 +83,7 @@ jobs:
     with:
       environment: ${{ needs.setup-environment.outputs.environment }}
       ref: ${{ needs.setup-environment.outputs.tag }}
-      lambdaName: 'All'
+      lambdaName: "All"
     secrets: inherit
 
   run-deployment:
@@ -100,5 +98,6 @@ jobs:
     needs: [run-deployment]
     uses: ./.github/workflows/run-regression.yml
     with:
-      environment: ${{ needs.setup-environment.outputs.environment }}
+      environment: ${{ inputs.environment }}
     secrets: inherit
+
