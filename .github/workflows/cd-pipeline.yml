@@ -1,18 +1,18 @@
 name: Continuous Deployment Pipeline
 # note:
-# It's useful to recognize that this workflow is designed to be triggered by a merge to the default branch.
-# Therefore, ${{ github.sha }} will always be in reference to the SHA that originally triggered this workflow.
+# It's useful to recognize that this workflow is designed to be triggered by a merge to the default branch. 
+# Therefore, ${{ github.sha }} will always be in reference to the SHA that originally triggered this workflow. 
 # $GITHUB_SHA, on the other hand, is created whenever actions/checkout@v4 is run
 
 # note:
 # environment:
-# name:
+  # name:
 # is keyword for using the environment protections.
 
-# with:
-# environment:
-# is simply using a variable named environment
-
+# with: 
+  # environment:
+# is simply using a variable named environment 
+  
 on:
   push:
     branches:
@@ -30,9 +30,9 @@ jobs:
     uses: ./.github/workflows/pr-label-semver.yml
     secrets: inherit
 
-  approval-to-deploy:
+  approval-deploy-perf:
     needs: pr-label-summary
-    environment:
+    environment: 
       name: perf-deploy
     runs-on: ubuntu-latest
     steps:
@@ -56,9 +56,9 @@ jobs:
     uses: ./.github/workflows/pre-tag-summary.yml
     secrets: inherit
 
-  approval-to-merge-to-release-branch:
+  approval-deploy-staging:
     needs: pre-tag-summary
-    environment:
+    environment: 
       name: staging-deploy
     runs-on: ubuntu-latest
     steps:
@@ -84,9 +84,9 @@ jobs:
       - name: Setup git user
         # The following is taken from https://github.com/actions/checkout/issues/13 as a common work-around
         run: |
-          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
-          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
-
+            git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+            git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+          
       - name: Merge commit SHA to release
         run: |
           git merge ${{ github.sha }} --no-squash -X theirs
@@ -113,9 +113,9 @@ jobs:
       ref: ${{ needs.create-and-post-tag.outputs.newVersion }}
       lambdaDeploy: true
 
-  QA-approval-of-staging:
+  approval-deploy-prod:
     needs: deploy-to-staging
-    environment:
+    environment: 
       name: prod-deploy
     runs-on: ubuntu-latest
     steps:
@@ -128,3 +128,4 @@ jobs:
     secrets: inherit
     with:
       draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
+
