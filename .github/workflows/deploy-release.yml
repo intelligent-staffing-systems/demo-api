@@ -33,7 +33,6 @@ on:
         default: 'dev'
         type: string
       ref:
-        default: 'dev'
         type: string
         required: true
       lambdaDeploy:
@@ -98,6 +97,6 @@ jobs:
     needs: [run-deployment]
     uses: ./.github/workflows/run-regression.yml
     with:
-      environment: ${{ inputs.environment }}
+      environment: ${{ needs.setup-environment.outputs.environment }}
     secrets: inherit
 

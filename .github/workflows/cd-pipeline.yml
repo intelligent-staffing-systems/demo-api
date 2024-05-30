@@ -104,8 +104,10 @@ jobs:
     with:
       previousVersion: ${{ needs.create-and-post-tag.outputs.previousVersion }}
 
+  # this needs create-and-post-tag added to the needs statement! I think!  verify for sure!!
+
   deploy-to-staging:
-    needs: create-release-notes
+    needs: [create-release-notes, create-and-post-tag]
     uses: ./.github/workflows/deploy-release.yml
     secrets: inherit
     with:
@@ -130,11 +132,11 @@ jobs:
       draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
 
   deploy-to-prod:
-    needs: create-release-notes
+    needs: [publish-release-notes, create-and-post-tag]
     uses: ./.github/workflows/deploy-release.yml
     secrets: inherit
     with:
-      environment: staging
+      environment: prod
       ref: ${{ needs.create-and-post-tag.outputs.newVersion }}
       lambdaDeploy: true
 
