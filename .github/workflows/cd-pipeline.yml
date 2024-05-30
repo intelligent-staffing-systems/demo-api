@@ -129,3 +129,12 @@ jobs:
     with:
       draftReleaseReference: ${{ needs.create-release-notes.outputs.draftReleaseReference }}
 
+  deploy-to-prod:
+    needs: create-release-notes
+    uses: ./.github/workflows/deploy-release.yml
+    secrets: inherit
+    with:
+      environment: staging
+      ref: ${{ needs.create-and-post-tag.outputs.newVersion }}
+      lambdaDeploy: true
+
