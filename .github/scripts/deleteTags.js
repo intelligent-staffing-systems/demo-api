@@ -33,7 +33,5 @@ async function deleteTags(params) {
   }
 }
 
-module.exports = {
-  deleteTags,
-};
+module.exports = deleteTags;
 
