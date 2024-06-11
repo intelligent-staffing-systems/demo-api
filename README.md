@@ -1,6 +1,9 @@
 # POC Pipeline for VA Notify
 latest runs are available to see in the [Actions tab of this repo](https://github.com/dialectic-devops/demo-api/actions/workflows/cd-pipeline.yml)
 
+![image](https://github.com/dialectic-devops/demo-api/assets/107153866/d25072bd-f9a7-4112-a8f4-8755b24071ac)
+
+
 ## How this pipeline works:
 
 This pipeline was designed with the primary user being Quality Assurance. 
@@ -11,5 +14,4 @@ Once the Draft release notes are created, a convenient link is provided to ensur
 
 
 Idealy these manually checks will be automated once greater confidence is had in team processes (to ensure correct labelling) and further automation of QA testing for performance and staging. 
-
 
