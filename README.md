@@ -1,11 +1,7 @@
-This work is [actively being used by department-of-veterans-affairs/notification-api](https://github.com/department-of-veterans-affairs/notification-api/actions/workflows/cd-pipeline.yml) <br>
-This work was completed in [PR #1828](https://github.com/department-of-veterans-affairs/notification-api/pull/1828)
-
-# POC Pipeline for VA Notify
+# POC Pipeline
 latest runs are available to see in the [Actions tab of this repo](https://github.com/dialectic-devops/demo-api/actions/workflows/cd-pipeline.yml)
 
 ![image](https://github.com/dialectic-devops/demo-api/assets/107153866/d25072bd-f9a7-4112-a8f4-8755b24071ac)
-
 
 ## How this pipeline works:
 
